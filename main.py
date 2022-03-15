@@ -14,7 +14,7 @@ class Field:
 
 fields = []
 #new_field = Field("names", 0, 10, lambda l : ' '.join(l))
-str_regex = r'[a-zA-Z_]+\w*'
+str_regex = r'[a-zA-Z_]+[\w/]*'
 rng_regex = "(\w+){(\d+)(?:,(\d+))?}"
 
 token_specification = [
@@ -85,4 +85,8 @@ def parse_header():
             dic = i.groupdict()
             create_field(dic)
 
+def csv_to_json():
+    return
+
 parse_header()
+csv_to_json()
