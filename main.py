@@ -26,20 +26,6 @@ token_specification = [
 tok_regex = '|'.join(('(?P<%s>%s)') % pair for pair in token_specification)
 
 
-#def create_field(unparsed_field):
-#    r = re.finditer(tok_regex, sys.stdin.readline())
-#    for i in r:
-#        dic = i.groupdict()
-#        print(dic)
-#    # create a Field   and return it
-#    #return field
-#
-## reaad header
-#m = sys.stdin.readline()
-#print(m)
-#header = [ create_field(field) for field in m ]
-
-
 def media(l):
     return sum(l) /len(l)
 
