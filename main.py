@@ -22,9 +22,9 @@ class Field:
 fields = []
 min = 0
 max = 0
-result = ""
+result = "["
 
-str_regex = r'[a-zA-Z_]+[\w/]*'
+str_regex = r'[a-zA-Z_]+[^,\n]*'
 rng_regex = "(\w+){(\d+)(?:,(\d+))?}"
 
 token_specification = [
@@ -124,12 +124,11 @@ def parse_Field(line,minimo, maximo):
     result += "},"
 
 def csv_to_json(f):
-    result = "["
+    global result
     for line in f.readlines():
         parse_Field(line, min, max)
-        result = result[:len(result)-1]
-        result += "\n]"
-    return result
+    result = result[:len(result)-1]
+    result += "\n]"
 
 if len(sys.argv) < 2:
     print("main.py <inputfile> [outputfile]")
