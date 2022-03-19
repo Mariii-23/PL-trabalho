@@ -1,19 +1,29 @@
-import sys, re
+#!/usr/bin/env python3
+import re
+from enum import Enum
+import sys
+
+class Type(Enum):
+    VAR = 0
+    ARRAY = 1
+    OP = 2
 
 class Field:
-    def __init__(self, name, minimum = 1, maximum = 1, agg_fun = lambda x:x):
+    def __init__(self, name, minimum = 1, maximum = 1, agg_fun = lambda x:x, type_field = Type.VAR):
         self.name = name
-        self.min =  minimum
-        self.max = maximum
+        self.min =  int(minimum)
+        self.max = int(maximum)
         self.agg_fun = agg_fun
+        self.type = type_field
 
     def __str__(self):
-         return "name: %s , min: %s, max: %s, agg_fun: %s" % (self.name,
-                 self.min, self.max , self.agg_fun.__name__)
-
-
+         return "name: %s , min: %s, max: %s, agg_fun: %s, type: %s" % (self.name,
+                                                                        self.min, self.max , self.agg_fun.__name__, self.type)
 fields = []
-#new_field = Field("names", 0, 10, lambda l : ' '.join(l))
+min = 0
+max = 0
+result = ""
+
 str_regex = r'[a-zA-Z_]+[\w/]*'
 rng_regex = "(\w+){(\d+)(?:,(\d+))?}"
 
@@ -29,7 +39,6 @@ tok_regex = '|'.join(('(?P<%s>%s)') % pair for pair in token_specification)
 def media(l):
     return sum(l) /len(l)
 
-
 # recebe nome{...}
 def parse_range(line):
     r = re.search(rng_regex, line)
@@ -38,13 +47,13 @@ def parse_range(line):
     maximum = maybe_max if maybe_max else minimum
     return {"name": r.group(1), "min": minimum, "max": maximum}
 
-
 def create_field(dic):
     field = None
     fun = None
     minimum = maximum = 1
     if dic['STR']:
         field = Field(dic['STR'])
+        field.type = Type.VAR
     else:
         if dic['AGG_FUNCTION']:
             r = dic['AGG_FUNCTION'].split('::')
@@ -61,18 +70,80 @@ def create_field(dic):
 
         if(fun):
             field.agg_fun = fun
-
-    print(field)
+            field.type = Type.OP
+        else:
+            field.type = Type.ARRAY
+    # print(field)
     fields.append(field)
+    global min, max
+    min += field.min
+    max += field.max
 
-def parse_header():
-    r = re.finditer(tok_regex, sys.stdin.readline())
+def parse_header(line):
+    r = re.finditer(tok_regex, line)
     for i in r:
             dic = i.groupdict()
             create_field(dic)
 
-def csv_to_json():
-    return
+def parse_Field(line,minimo, maximo):
+    global result
+    global r
+    line = line[:-1]
+    list_words = r.findall(line)
+    if len(list_words) - 1 < minimo or len(list_words) -1 > maximo:
+        return
+    indice = 0
 
-parse_header()
-csv_to_json()
+    result += f'\n{" "*4}'
+    result += '{'
+    for elem in fields:
+        if elem.type == Type.OP:
+            array = []
+            for _ in range(elem.max):
+                num = list_words[indice]
+                if num != "":
+                    array.append(int(num))
+                indice += 1
+            result += f'\n{" "*8}\"{elem.name}_{elem.agg_fun.__name__}\": '
+            value = elem.agg_fun(array)
+            result += f'{value},'
+
+        elif elem.type == Type.ARRAY:
+            array = []
+            for _ in range(elem.max):
+                num = list_words[indice]
+                if num != "":
+                    array.append(int(num))
+                indice += 1
+            result += f'\n{" "*8}\"{elem.name}\": {array},'
+        else:
+            result += f'\n{" "*8}\"{elem.name}\": \"{list_words[indice]}\",'
+            indice += 1
+    result = result[:len(result)-1]
+    result += f'\n{" "*4}'
+    result += "},"
+
+def csv_to_json(f):
+    result = "["
+    for line in f.readlines():
+        parse_Field(line, min, max)
+        result = result[:len(result)-1]
+        result += "\n]"
+    return result
+
+if len(sys.argv) < 2:
+    print("main.py <inputfile> [outputfile]")
+    exit()
+
+inputfile = sys.argv[1]
+outputfile = re.search('[^\.]+', inputfile).group(0) + ".json" if len(sys.argv) == 2 else sys.argv[2]
+
+f = open(inputfile, "r")
+r = re.compile(r'([^,\n]*),?')
+
+parse_header(f.readline())
+csv_to_json(f)
+
+out = open(outputfile, "w")
+out.write(result)
+out.close()
