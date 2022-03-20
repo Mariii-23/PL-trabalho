@@ -127,7 +127,8 @@ def csv_to_json(f):
     global result
     for line in f.readlines():
         parse_Field(line, min, max)
-    result = result[:len(result)-1]
+    if(len(result) > 1):
+        result = result[:len(result)-1]
     result += "\n]"
 
 if len(sys.argv) < 2:
