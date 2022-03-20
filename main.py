@@ -57,7 +57,11 @@ def create_field(dic):
     else:
         if dic['AGG_FUNCTION']:
             r = dic['AGG_FUNCTION'].split('::')
-            fun = eval(r[1])
+            try:
+                fun = eval(r[1])
+            except NameError:
+                print("Aggregation Function Does Not Exist...")
+                return
             # se tiver um range {x,y} ou {x}
             dict_range = parse_range(r[0])
         elif dic['RANGE']:
