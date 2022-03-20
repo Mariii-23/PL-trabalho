@@ -101,7 +101,7 @@ def parse_Field(line,minimo, maximo):
                 indice += 1
             result += f'\n{" "*8}\"{elem.name}_{elem.agg_fun.__name__}\": '
             value = elem.agg_fun(array)
-            result += f'{value}{separator}'
+            result += f'{value},'
 
         elif elem.type == Type.ARRAY:
             array = []
@@ -110,13 +110,13 @@ def parse_Field(line,minimo, maximo):
                 if num != "":
                     array.append(int(num))
                 indice += 1
-            result += f'\n{" "*8}\"{elem.name}\": {array}{separator}'
+            result += f'\n{" "*8}\"{elem.name}\": {array},'
         else:
-            result += f'\n{" "*8}\"{elem.name}\": \"{list_words[indice]}\"{separator}'
+            result += f'\n{" "*8}\"{elem.name}\": \"{list_words[indice]}\",'
             indice += 1
     result = result[:len(result)-1]
     result += f'\n{" "*4}'
-    result += "}" + separator
+    result += "},"
 
 def csv_to_json(f):
     global result
