@@ -148,7 +148,7 @@ token_specification = [
 tok_regex = '|'.join(('(?P<%s>%s)') % pair for pair in token_specification)
 
 f = open(inputfile, "r")
-r = re.compile(r'([^'+ separator + '\n]*)'+ separator + r',?')
+r = re.compile(r'([^'+separator+'\n]*)'+separator+'?')
 
 parse_header(f.readline())
 csv_to_json(f)
