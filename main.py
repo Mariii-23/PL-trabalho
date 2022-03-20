@@ -1,6 +1,7 @@
 #!/usr/bin/env python3
 import re
 from enum import Enum
+import argparse
 import sys
 
 class Type(Enum):
@@ -24,16 +25,6 @@ min = 0
 max = 0
 result = "["
 
-str_regex = r'[a-zA-Z_]+[^,\n]*'
-rng_regex = "(\w+){(\d+)(?:,(\d+))?}"
-
-token_specification = [
-        ('AGG_FUNCTION', r'(%s|%s)(::(\w+))' % (str_regex, rng_regex)),
-        ('RANGE', rng_regex),
-        ('STR', str_regex),
-]
-
-tok_regex = '|'.join(('(?P<%s>%s)') % pair for pair in token_specification)
 
 
 def media(l):
@@ -110,7 +101,7 @@ def parse_Field(line,minimo, maximo):
                 indice += 1
             result += f'\n{" "*8}\"{elem.name}_{elem.agg_fun.__name__}\": '
             value = elem.agg_fun(array)
-            result += f'{value},'
+            result += f'{value}{separator}'
 
         elif elem.type == Type.ARRAY:
             array = []
@@ -119,13 +110,13 @@ def parse_Field(line,minimo, maximo):
                 if num != "":
                     array.append(int(num))
                 indice += 1
-            result += f'\n{" "*8}\"{elem.name}\": {array},'
+            result += f'\n{" "*8}\"{elem.name}\": {array}{separator}'
         else:
-            result += f'\n{" "*8}\"{elem.name}\": \"{list_words[indice]}\",'
+            result += f'\n{" "*8}\"{elem.name}\": \"{list_words[indice]}\"{separator}'
             indice += 1
     result = result[:len(result)-1]
     result += f'\n{" "*4}'
-    result += "},"
+    result += "}" + separator
 
 def csv_to_json(f):
     global result
@@ -135,15 +126,29 @@ def csv_to_json(f):
         result = result[:len(result)-1]
     result += "\n]"
 
-if len(sys.argv) < 2:
-    print("main.py <inputfile> [outputfile]")
-    exit()
+parser = argparse.ArgumentParser(description='CSV TO JSON')
 
-inputfile = sys.argv[1]
+parser.add_argument('input_file')
+parser.add_argument('output_file')
+parser.add_argument('-F')
+args = parser.parse_args()
+inputfile = args.input_file
+separator = ',' if not args.F else args.F
 outputfile = re.search('[^\.]+', inputfile).group(0) + ".json" if len(sys.argv) == 2 else sys.argv[2]
 
+str_regex = r'[a-zA-Z_]+[^'+separator+r'\n]*'
+rng_regex = r"(\w+){(\d+)(?:,(\d+))?}"
+
+token_specification = [
+        ('AGG_FUNCTION', r'(%s|%s)(::(\w+))' % (str_regex, rng_regex)),
+        ('RANGE', rng_regex),
+        ('STR', str_regex),
+]
+
+tok_regex = '|'.join(('(?P<%s>%s)') % pair for pair in token_specification)
+
 f = open(inputfile, "r")
-r = re.compile(r'([^,\n]*),?')
+r = re.compile(r'([^'+ separator + '\n]*)'+ separator + r',?')
 
 parse_header(f.readline())
 csv_to_json(f)
