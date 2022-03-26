@@ -43,21 +43,21 @@ def create_field(dic):
     field = None
     fun = None
     minimum = maximum = 1
-    global r_split
+    global r_split, r
 
     if dic['STR']:
         field = Field(dic['STR'])
     else:
         if dic['AGG_FUNCTION']:
-            r = r_split.search(dic['AGG_FUNCTION'])
+            r_ = r_split.search(dic['AGG_FUNCTION'])
             try:
-                fun = eval(r.group(2))
+                fun = eval(r_.group(2))
             except NameError:
                 print("Aggregation Function Does Not Exist...")
                 return
             # se tiver um range {x,y} ou {x}
-            field = Field(r.group(1))
-            dict_range = parse_range(r.group(1))
+            field = Field(r_.group(1))
+            dict_range = parse_range(r_.group(1))
             if (dict_range):
                 minimum = dict_range['min']
                 maximum = dict_range['max']
@@ -70,6 +70,10 @@ def create_field(dic):
                 minimum = dict_range['min']
                 maximum = dict_range['max']
                 field = Field(dict_range['name'], minimum, maximum)
+        else:
+            list_words = r.findall(dic['ERROR'])
+            print("Error found in header: " + list_words[1])
+            exit(1)
 
         if(fun):
             field.agg_fun = fun
@@ -81,8 +85,8 @@ def create_field(dic):
 def parse_header(line):
     r = re.finditer(tok_regex, line)
     for i in r:
-            dic = i.groupdict()
-            create_field(dic)
+        dic = i.groupdict()
+        create_field(dic)
 
 def parse_Field(line,minimo, maximo):
     global result
@@ -93,37 +97,41 @@ def parse_Field(line,minimo, maximo):
         return
     indice = 0
 
-    result += f'\n{" "*4}'
-    result += '{'
-    for elem in fields:
-        result += f'\n{" "*8}\"{elem.name}'
-        if elem.agg_fun.__name__ == "<lambda>":
-            result += '\": '
-        else:
-            result += f'_{elem.agg_fun.__name__}\": '
-        if elem.max == 1:
-            value = list_words[indice]
-            indice += 1
+    try:
+        result += f'\n{" "*4}'
+        result += '{'
+        for elem in fields:
+            result += f'\n{" "*8}\"{elem.name}'
             if elem.agg_fun.__name__ == "<lambda>":
-                result += f'\"{value}\"'
+                result += '\": '
             else:
-                result += f'{elem.agg_fun(value)}'
-        else:
-            array = []
-            for _ in range(elem.max):
-               num = list_words[indice]
-               if num != "":
-                   array.append(int(num))
-               indice += 1
+                result += f'_{elem.agg_fun.__name__}\": '
+            if elem.max == 1:
+                value = list_words[indice]
+                indice += 1
+                if elem.agg_fun.__name__ == "<lambda>":
+                    result += f'\"{value}\"'
+                else:
+                    result += f'{elem.agg_fun(value)}'
+            else:
+                array = []
+                for _ in range(elem.max):
+                    num = list_words[indice]
+                    if num != "":
+                        array.append(int(num))
+                    indice += 1
 
-            if elem.agg_fun.__name__ == "<lambda>":
-                result += f'{elem.agg_fun(array)}'
-            else:
-                result += f'{array}'
-        result += ","
-    result = result[:len(result)-1]
-    result += f'\n{" "*4}'
-    result += "},"
+                if elem.agg_fun.__name__ == "<lambda>":
+                    result += f'{array}'
+                else:
+                    result += f'{elem.agg_fun(array)}'
+            result+= ","
+        result = result[:len(result)-1]
+        result += f'\n{" "*4}'
+        result += "},"
+    except Exception:
+        result += "},"
+        return
 
 def csv_to_json(f):
     global result
@@ -131,7 +139,8 @@ def csv_to_json(f):
         parse_Field(line, min, max)
     if(len(result) > 1):
         result = result[:len(result)-1]
-    result += "\n]"
+        result += "\n"
+    result += "]"
 
 parser = argparse.ArgumentParser(description='CSV TO JSON')
 
