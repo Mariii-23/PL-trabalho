@@ -4,28 +4,20 @@ from enum import Enum
 import argparse
 import sys
 
-class Type(Enum):
-    VAR = 0
-    ARRAY = 1
-    OP = 2
-
 class Field:
-    def __init__(self, name, minimum = 1, maximum = 1, agg_fun = lambda x:x, type_field = Type.VAR):
+    def __init__(self, name, minimum = 1, maximum = 1, agg_fun = lambda x:x):
         self.name = name
         self.min =  int(minimum)
         self.max = int(maximum)
         self.agg_fun = agg_fun
-        self.type = type_field
 
     def __str__(self):
-         return "name: %s , min: %s, max: %s, agg_fun: %s, type: %s" % (self.name,
-                                                                        self.min, self.max , self.agg_fun.__name__, self.type)
+         return "name: %s , min: %s, max: %s, agg_fun: %s" % (self.name,
+                                                                        self.min, self.max , self.agg_fun.__name__)
 fields = []
 min = 0
 max = 0
 result = "["
-
-
 
 def media(l):
     return sum(l) /len(l)
@@ -42,9 +34,9 @@ def create_field(dic):
     field = None
     fun = None
     minimum = maximum = 1
+
     if dic['STR']:
         field = Field(dic['STR'])
-        field.type = Type.VAR
     else:
         if dic['AGG_FUNCTION']:
             r = dic['AGG_FUNCTION'].split('::')
@@ -54,21 +46,23 @@ def create_field(dic):
                 print("Aggregation Function Does Not Exist...")
                 return
             # se tiver um range {x,y} ou {x}
+            field = Field(r[0])
             dict_range = parse_range(r[0])
+            if (dict_range):
+                minimum = dict_range['min']
+                maximum = dict_range['max']
+                field = Field(dict_range['name'], minimum, maximum)
+
         elif dic['RANGE']:
             dict_range = parse_range(dic['RANGE'])
 
-        if (dict_range):
-            minimum = dict_range['min']
-            maximum = dict_range['max']
-            field = Field(dict_range['name'], minimum, maximum)
+            if (dict_range):
+                minimum = dict_range['min']
+                maximum = dict_range['max']
+                field = Field(dict_range['name'], minimum, maximum)
 
         if(fun):
             field.agg_fun = fun
-            field.type = Type.OP
-        else:
-            field.type = Type.ARRAY
-    # print(field)
     fields.append(field)
     global min, max
     min += field.min
@@ -92,28 +86,31 @@ def parse_Field(line,minimo, maximo):
     result += f'\n{" "*4}'
     result += '{'
     for elem in fields:
-        if elem.type == Type.OP:
-            array = []
-            for _ in range(elem.max):
-                num = list_words[indice]
-                if num != "":
-                    array.append(int(num))
-                indice += 1
-            result += f'\n{" "*8}\"{elem.name}_{elem.agg_fun.__name__}\": '
-            value = elem.agg_fun(array)
-            result += f'{value},'
-
-        elif elem.type == Type.ARRAY:
-            array = []
-            for _ in range(elem.max):
-                num = list_words[indice]
-                if num != "":
-                    array.append(int(num))
-                indice += 1
-            result += f'\n{" "*8}\"{elem.name}\": {array},'
+        result += f'\n{" "*8}\"{elem.name}'
+        if elem.agg_fun.__name__ != None:
+            result += '\": '
         else:
-            result += f'\n{" "*8}\"{elem.name}\": \"{list_words[indice]}\",'
+            result += f'_{elem.agg_fun.__name__}\": '
+        if elem.max == 1:
+            value = list_words[indice]
             indice += 1
+            if elem.agg_fun.__name__ != None:
+                result += f'\"{value}\"'
+            else:
+                result += f'{elem.agg_fun(value)}'
+        else:
+            array = []
+            for _ in range(elem.max):
+               num = list_words[indice]
+               if num != "":
+                   array.append(int(num))
+               indice += 1
+
+            if elem.agg_fun.__name__ != None:
+                result += f'{elem.agg_fun(array)}'
+            else:
+                result += f'{array}'
+        result += ","
     result = result[:len(result)-1]
     result += f'\n{" "*4}'
     result += "},"
