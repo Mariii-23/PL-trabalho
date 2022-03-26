@@ -22,32 +22,42 @@ result = "["
 def media(l):
     return sum(l) /len(l)
 
+def hello(l):
+    return "Hello::" + l + "::Hello"
+
 # recebe nome{...}
 def parse_range(line):
     r = re.search(rng_regex, line)
-    maybe_max = r.group(3)
-    minimum = r.group(2)
-    maximum = maybe_max if maybe_max else minimum
-    return {"name": r.group(1), "min": minimum, "max": maximum}
+    if r:
+        maybe_max = r.group(3)
+        minimum = r.group(2)
+        maximum = maybe_max if maybe_max else minimum
+        name = r.group(1)
+    else:
+        minimum = 1
+        maximum = 1
+        name = line
+    return {"name": name, "min": minimum, "max": maximum}
 
 def create_field(dic):
     field = None
     fun = None
     minimum = maximum = 1
+    global r_split
 
     if dic['STR']:
         field = Field(dic['STR'])
     else:
         if dic['AGG_FUNCTION']:
-            r = dic['AGG_FUNCTION'].split('::')
+            r = r_split.search(dic['AGG_FUNCTION'])
             try:
-                fun = eval(r[1])
+                fun = eval(r.group(2))
             except NameError:
                 print("Aggregation Function Does Not Exist...")
                 return
             # se tiver um range {x,y} ou {x}
-            field = Field(r[0])
-            dict_range = parse_range(r[0])
+            field = Field(r.group(1))
+            dict_range = parse_range(r.group(1))
             if (dict_range):
                 minimum = dict_range['min']
                 maximum = dict_range['max']
@@ -87,14 +97,14 @@ def parse_Field(line,minimo, maximo):
     result += '{'
     for elem in fields:
         result += f'\n{" "*8}\"{elem.name}'
-        if elem.agg_fun.__name__ != None:
+        if elem.agg_fun.__name__ == "<lambda>":
             result += '\": '
         else:
             result += f'_{elem.agg_fun.__name__}\": '
         if elem.max == 1:
             value = list_words[indice]
             indice += 1
-            if elem.agg_fun.__name__ != None:
+            if elem.agg_fun.__name__ == "<lambda>":
                 result += f'\"{value}\"'
             else:
                 result += f'{elem.agg_fun(value)}'
@@ -106,7 +116,7 @@ def parse_Field(line,minimo, maximo):
                    array.append(int(num))
                indice += 1
 
-            if elem.agg_fun.__name__ != None:
+            if elem.agg_fun.__name__ == "<lambda>":
                 result += f'{elem.agg_fun(array)}'
             else:
                 result += f'{array}'
@@ -146,8 +156,11 @@ tok_regex = '|'.join(('(?P<%s>%s)') % pair for pair in token_specification)
 
 f = open(inputfile, "r")
 r = re.compile(r'([^'+separator+'\n]*)'+separator+'?')
+r_split = re.compile(r'(\w+(?:{\d+(?:,\d+)?})?)::(.+)')
 
 parse_header(f.readline())
+# for field in fields:
+#     print(field)
 csv_to_json(f)
 
 out = open(outputfile, "w")
