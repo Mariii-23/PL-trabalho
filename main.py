@@ -112,7 +112,7 @@ def parse_Field(line,minimo, maximo):
                 if elem.agg_fun.__name__ == "<lambda>":
                     result += f'\"{value}\"'
                 else:
-                    result += f'{elem.agg_fun(value)}'
+                    result += f'\"{elem.agg_fun(value)}\"'
             else:
                 array = []
                 for _ in range(elem.max):
@@ -139,7 +139,6 @@ def parse_Field(line,minimo, maximo):
         result += "},"
     except Exception:
         result += "},"
-        print("fodasse")
         return
 
 def csv_to_json(f):
