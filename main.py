@@ -122,7 +122,11 @@ def parse_Field(line,minimo, maximo):
                     indice += 1
 
                 if elem.agg_fun.__name__ == "<lambda>":
-                    result += f'{array}'
+                    result += '['
+                    for elem in array:
+                        result += f'\"{elem}\",'
+                    result = result[:len(result)-1]
+                    result += ']'
                 else:
                     array = [int(num, base=16) for num in array]
                     result += f'{elem.agg_fun(array)}'
