@@ -1,0 +1,34 @@
+[
+    {
+        "Número": "a93232",
+        "Nome": "Joana Epifânio",
+        "Curso_hello": "Hello::Línguas Aplicadas::Hello",
+        "Notas_media": 19.0,
+        "Desporto_len": 0,
+        "Valor_int": 2
+    },
+    {
+        "Número": "a92123",
+        "Nome": "Catarina Belo",
+        "Curso_hello": "Hello::Relações Internacionais::Hello",
+        "Notas_media": 24.333333333333332,
+        "Desporto_len": 1,
+        "Valor_int": 2
+    },
+    {
+        "Número": "a93212",
+        "Nome": "Marcelo Feio",
+        "Curso_hello": "Hello::Engenharia Biomédica::Hello",
+        "Notas_media": 22.666666666666668,
+        "Desporto_len": 2,
+        "Valor_int": 1900
+    },
+    {
+        "Número": "a91234",
+        "Nome": "Pedro Castilho",
+        "Curso_hello": "Hello::Psicologia::Hello",
+        "Notas_media": 24.666666666666668,
+        "Desporto_len": 3,
+        "Valor_int": 3
+    }
+]
