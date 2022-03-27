@@ -128,7 +128,10 @@ def parse_Field(line,minimo, maximo):
                     result = result[:len(result)-1]
                     result += ']'
                 else:
-                    array = [int(num, base=16) for num in array]
+                    try:
+                        array = [int(num, base=16) for num in array]
+                    except Exception:
+                        pass
                     result += f'{elem.agg_fun(array)}'
             result+= ","
         result = result[:len(result)-1]
@@ -136,6 +139,7 @@ def parse_Field(line,minimo, maximo):
         result += "},"
     except Exception:
         result += "},"
+        print("fodasse")
         return
 
 def csv_to_json(f):
