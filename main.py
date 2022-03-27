@@ -112,7 +112,11 @@ def parse_Field(line,minimo, maximo):
                 if elem.agg_fun.__name__ == "<lambda>":
                     result += f'\"{value}\"'
                 else:
-                    result += f'\"{elem.agg_fun(value)}\"'
+                    value = elem.agg_fun(value);
+                    if type(value) == int :
+                        result += f'{value}'
+                    else:
+                        result += f'\"{value}\"'
             else:
                 array = []
                 for _ in range(elem.max):
