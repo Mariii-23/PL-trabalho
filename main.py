@@ -118,12 +118,13 @@ def parse_Field(line,minimo, maximo):
                 for _ in range(elem.max):
                     num = list_words[indice]
                     if num != "":
-                        array.append(int(num))
+                        array.append(num)
                     indice += 1
 
                 if elem.agg_fun.__name__ == "<lambda>":
                     result += f'{array}'
                 else:
+                    array = [int(num, base=16) for num in array]
                     result += f'{elem.agg_fun(array)}'
             result+= ","
         result = result[:len(result)-1]
