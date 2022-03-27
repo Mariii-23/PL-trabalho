@@ -145,13 +145,13 @@ def csv_to_json(f):
 
 parser = argparse.ArgumentParser(description='CSV TO JSON')
 
-parser.add_argument('input_file')
-parser.add_argument('output_file')
+# parser.add_argument('input_file')
+# parser.add_argument('output_file')
 parser.add_argument('-F')
 args = parser.parse_args()
-inputfile = args.input_file
+# inputfile = args.input_file
 separator = ',' if not args.F else args.F
-outputfile = re.search('[^\.]+', inputfile).group(0) + ".json" if len(sys.argv) == 2 else sys.argv[2]
+# outputfile = re.search('[^\.]+', inputfile).group(0) + ".json" if len(sys.argv) == 2 else sys.argv[2]
 
 str_regex = r'[a-zA-Z_]+[^'+separator+r'\n]*'
 rng_regex = r"(\w+){(\d+)(?:,(\d+))?}"
@@ -164,7 +164,8 @@ token_specification = [
 
 tok_regex = '|'.join(('(?P<%s>%s)') % pair for pair in token_specification)
 
-f = open(inputfile, "r")
+# f = open(inputfile, "r")
+f = sys.stdin
 r = re.compile(r'([^'+separator+'\n]*)'+separator+'?')
 r_split = re.compile(r'(\w+(?:{\d+(?:,\d+)?})?)::(.+)')
 
@@ -173,6 +174,7 @@ parse_header(f.readline())
 #     print(field)
 csv_to_json(f)
 
-out = open(outputfile, "w")
-out.write(result)
-out.close()
+print(result)
+# out = open(outputfile, "w")
+# out.write(result)
+# out.close()
