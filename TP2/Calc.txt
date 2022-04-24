@@ -1,0 +1,24 @@
+Z -> Exp '.';
+;
+
+Exp -> Termo Exp2;
+;
+
+Exp2 -> '+' Exp;
+      | '-' Exp;
+      | ;
+;
+
+Termo -> Fator Termo2;
+;
+
+Termo2 -> '*' Termo;
+        | '/' Termo;
+        | ;
+;
+
+Fator -> 'id';
+       | 'num';
+       | '(' Exp ')';
+;
+.

@@ -1,0 +1,11 @@
+Exp -> Ola1 Ola2;
+    | Ola3 ;
+    | Ola4 valueasdfas asdfasd brhhh;
+;
+
+Ola -> valuee;
+;
+
+Id -> Ola Exp;
+;
+.
