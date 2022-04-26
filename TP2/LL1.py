@@ -1,25 +1,22 @@
 #!/usr/bin/env python3
+#
+import numpy as np
 
 class Condiction:
     def __init__(self, tokens: list = [], symbols = [], last_symbol: str = ''):
-        self.tokens =  tokens
+        self.rules =  tokens
         self.symbols = symbols
         self.last_symbol = last_symbol
 
     def __str__(self):
         phrase = ""
-        for value in self.tokens:
+        for value in self.rules:
             phrase += value + " "
         phrase += "\t\t{ "
         for value in self.symbols :
             phrase += value + " "
         phrase += "}"
         return phrase
-
-    # def insert(self, token, symbols = []):
-    #     self.tokens += [token]
-    #     if len(self.symbols) == 0:
-    #         self.symbols = symbols
 
 class Exp:
     def __init__(self, name, condictions):
@@ -47,12 +44,12 @@ class Exp:
 class LL1:
     def __init__(self, exps = {}):
         self.exps = exps
-        self.tokens = []
+        self.rules = []
         self.literals = []
 
     def __str__(self):
         phrase = "Tokens : "
-        for token in self.tokens:
+        for token in self.rules:
             phrase += token + " "
         phrase += "\nLiterals : "
         for literal in self.literals:
@@ -79,89 +76,56 @@ class LL1:
             else:
                 for condiction in exp.condictions:
                     symbols += self.search_symbol(condiction, exp.name)
-                # condiction.symbols = symbols
             self.exps[exp.name].symbols = symbols
 
         return symbols
 
-    def get_last_symbols(self, name_exp):
-       last_symbols = []
+    def get_follow_symbols(self, name_exp, dont_look):
+       symbols = []
        exp = self.exps[name_exp]
        for condiction in exp.condictions:
-           last = condiction.last_symbol
-           if last in self.literals:
-               last_symbols += [last]
+           if len(condiction.rules) == 0:
+               symbols += self.build_symbols_right(exp.name, [])
            else:
-               print(last)
-               print(exp.name)
-           # TODO nao tou a perceber porque raio
-           # else:
-               # if last not in self.exps:
-               #     print("fds")
-               # exp_aux = self.exps[last]
-               # for condiction2 in exp_aux.condictions:
-               #     if len(condiction2.symbols) > 0:
-               #         last_symbols += [condiction2.symbols[-1]]
-               #     else:
-               #         last_symbols += self.build_symbols_right(last)
-
-           #     last_symbols += self.get_last_symbols(last)
-       return last_symbols
-
-    def get_symbols_rigth(self, name):
-       symbols = []
-       exp = self.exps[name]
-       for condiction in exp.condictions:
-           value = condiction.last_symbol
-           if value != '':
-               if value in self.literals:
-                   symbols += [value]
-               else:
-                   symbols += self.get_symbols_rigth(value)
-           else:
-               for name_ in self.exps:
-                   exp_aux = self.exps[name_]
-                   for condiction in exp.condictions:
-                       last = ""
-                       for token in condiction.tokens:
-                           if name_ == last:
-                               if last in self.literals:
-                                   symbols += [token]
-                               else:
-                                   print(token_)
-                                   symbols += self.get_last_symbols(token_)
-                           last = token
-               symbols += self.build_symbols_right(name)
+               symbols_condiction = condiction.symbols
+               # TODO no caso dos simbolos da condicao forem 0
+               # temos uma expressao no inicio... logo temos q ir pesquisar
+               symbols += symbols_condiction
        return symbols
 
-    def build_symbols_right(self, name):
+
+    def build_symbols_right(self, name, dont_look):
         symbols = []
         for exp in self.exps:
             exp = self.exps[exp]
+            if exp.name == name or exp.name in dont_look:
+                continue
             for condiction in exp.condictions:
-                    last = ""
-                    for token in condiction.tokens:
-                        if token == name:
-                            if last == "" :
-                                symbols += self.get_symbols_rigth(exp.name)
-                            elif last in self.literals:
-                                symbols += [last]
-                            else:
-                                symbols += self.get_last_symbols(last)
-                        last = token
+                length = len(condiction.rules)
+                if name in condiction.rules:
+                    rules = np.array(condiction.rules)
+                    indexs = np.where(rules == name)[0]
 
+                    for index in indexs:
+                        if length-1 == index:
+                            symbols += self.build_symbols_right(exp.name, dont_look+[name])
+                        else:
+                            elem_name =  condiction.rules[index + 1]
+                            if elem_name in self.literals:
+                                symbols += [elem_name]
+                            else:
+                                symbols += self.get_follow_symbols(elem_name, [])
         return symbols
 
     def search_symbol(self, condiction, exp_name):
         symbols = condiction.symbols
         if len(symbols) == 0:
-            if len(condiction.tokens) > 0:
-                value = condiction.tokens[0]
+            if len(condiction.rules) > 0:
+                value = condiction.rules[0]
                 symbols = self.build_symbols_exp(value)
             else:
                 #procurar a direita
-                # symbols = self.build_symbols_right(exp_name)
-                print("fuck this")
+                symbols = self.build_symbols_right(exp_name, [])
 
             condiction.symbols = symbols
         return symbols
@@ -169,19 +133,20 @@ class LL1:
     def build_symbols_exps(self):
         for exp in self.exps:
             self.build_symbols_exp(exp)
-    # TODO
+
     def isLL1(self):
         result = True
         for exp in self.exps:
             exp = self.exps[exp]
             if len(exp.condictions) == 1:
                 continue
-            values = set()
+            values = []
             for condiction in exp.condictions:
                 if not result:
                     return result
-                length = len(values)
-                values.add(tuple(condiction.tokens))
-                result = length < len(values)
-
+                for value in condiction.symbols:
+                    if value in values:
+                        result = False
+                    else:
+                        values += [value]
         return result

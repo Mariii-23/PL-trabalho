@@ -54,7 +54,7 @@ def rec_Tokens(tokens: list = [], symbols: list = [], last: str = ''):
     if prox_simb.type == 'ID':
         value = rec_term('ID')
         acoes = rec_Tokens(tokens + [value], symbols, value)
-        tokens = acoes.tokens
+        tokens = acoes.rules
         symbols = acoes.symbols
         last = acoes.last_symbol
     elif prox_simb.type == 'LITERAL':
@@ -62,7 +62,7 @@ def rec_Tokens(tokens: list = [], symbols: list = [], last: str = ''):
         LL1.literals += [value]
         symbols = [value] if len(symbols) == 0 else symbols
         acoes = rec_Tokens(tokens + [value], symbols, value)
-        tokens = acoes.tokens
+        tokens = acoes.rules
         symbols = acoes.symbols
         last = acoes.last_symbol
     elif prox_simb.type == 'END':
@@ -105,7 +105,7 @@ def rec_Exp():
     global prox_simb
     global LL1
     name = rec_term('ID')
-    LL1.tokens += [name]
+    LL1.rules += [name]
 
     rec_term('SETA')
 
