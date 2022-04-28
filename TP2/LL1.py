@@ -90,6 +90,9 @@ class LL1:
                symbols_condiction = condiction.symbols
                # TODO no caso dos simbolos da condicao forem 0
                # temos uma expressao no inicio... logo temos q ir pesquisar
+               # TODO verificar se ta bem
+               if len(symbols_condiction) == 0:
+                   symbols_condicton = self.build_symbols_right(exp.name, [])
                symbols += symbols_condiction
        return symbols
 

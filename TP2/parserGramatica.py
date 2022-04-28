@@ -129,6 +129,9 @@ def rec_Exps():
         parserError(prox_simb)
 
 def rec_Start():
+    global LL1
+    exp = rec_Exp()
+    LL1.insert(exp)
     rec_Exps()
 
 def rec_Parser(data):
