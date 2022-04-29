@@ -11,7 +11,7 @@ t_END = r';'
 t_END_PARSER = r'.'
 t_SEP = r'\|'
 
-t_FCLOSE = r'\]'
+t_FCLOSE = r'\s*\]'
 t_ALITERALS = r'Literals\s*=\s*\[\s*'
 
 t_ATOKENS = r'Tokens\s*=\s*\[\s*'
@@ -38,6 +38,7 @@ prox_simb = ('Erro', '',0,0)
 # TODO escrever um erro melhor
 def parserError(simb):
     print("Erro sintático: ", simb)
+    exit(-1)
 
 def parserErrorExit():
     print("Erro sintático")

@@ -22,7 +22,6 @@ def add_tokens(ll1: LL1):
     string += "\ntokens = ("
     for token in ll1.tokens:
         string += token + ","
-    string = string[:len(string)-1]
     string += ")\n\n"
 
     for token in ll1.tokens:

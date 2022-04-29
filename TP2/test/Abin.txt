@@ -1,0 +1,13 @@
+Literals = [ '(' ')' '.' ]
+Tokens = [ 'num'='\d+' ]
+
+Z -> Abin '.';
+;
+
+Abin -> '(' Aux ')';
+;
+
+Aux -> 'num' Abin Abin;
+     | ;
+;
+.
