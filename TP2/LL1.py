@@ -45,11 +45,15 @@ class LL1:
     def __init__(self, exps = {}):
         self.exps = exps
         self.rules = []
-        self.literals = []
+        self.literals = {}
+        self.tokens = []
 
     def __str__(self):
-        phrase = "Tokens : "
+        phrase = "Rules : "
         for token in self.rules:
+            phrase += token + " "
+        phrase += "\nTokens : "
+        for token in self.tokens:
             phrase += token + " "
         phrase += "\nLiterals : "
         for literal in self.literals:

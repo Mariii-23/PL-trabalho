@@ -1,13 +1,20 @@
 #!/usr/bin/env python3
 import ply.lex as lex
-tokens = ('ID', 'SETA', 'END', 'SEP', 'END_PARSER', 'LITERAL')
+tokens = ('ID', 'SETA', 'END', 'SEP', 'END_PARSER', 'LITERAL', 'ATOKENS',
+          'FCLOSE', 'ALITERALS', 'REGEX', 'EQUALS')
 
+t_EQUALS = '='
 t_ID = r'[A-Za-z]\w*'
 t_LITERAL = r'\'[^\']+\''
 t_SETA = r'->'
 t_END = r';'
 t_END_PARSER = r'.'
 t_SEP = r'\|'
+
+t_FCLOSE = r'\]'
+t_ALITERALS = r'Literals\s*=\s*\[\s*'
+
+t_ATOKENS = r'Tokens\s*=\s*\[\s*'
 
 # define a rule so we can track line numbers
 def t_new_line(t):
@@ -59,7 +66,11 @@ def rec_Tokens(tokens: list = [], symbols: list = [], last: str = ''):
         last = acoes.last_symbol
     elif prox_simb.type == 'LITERAL':
         value = rec_term('LITERAL')
-        LL1.literals += [value]
+        if value not in LL1.literals and  value not in LL1.tokens :
+            parserError(prox_simb)
+            print("Token or Id dont exist: " + value)
+            exit(-1)
+
         symbols = [value] if len(symbols) == 0 else symbols
         acoes = rec_Tokens(tokens + [value], symbols, value)
         tokens = acoes.rules
@@ -80,21 +91,23 @@ def rec_Condicao():
         value = rec_term('ID')
     elif prox_simb.type == 'LITERAL':
         value = rec_term('LITERAL')
-        LL1.literals += [value]
+        # LL1.literals += [value]
         symbols = [value]
     else:
         parserError(prox_simb)
 
     return rec_Tokens([value], symbols, value)
 
-def rec_Condicoes(condicoes):
+def rec_Condicoes():
     global prox_simb
     if prox_simb == None:
         parserErrorExit()
+    condicoes = []
     if prox_simb.type == 'SEP':
         rec_term('SEP')
         condicao = rec_Tokens()
-        condicoes = rec_Condicoes(condicoes + [condicao])
+        condicoes = [condicao]
+        condicoes += rec_Condicoes()
     elif prox_simb.type == 'END':
         rec_term('END')
     else:
@@ -110,7 +123,8 @@ def rec_Exp():
     rec_term('SETA')
 
     condicao = rec_Condicao()
-    condicoes = rec_Condicoes([condicao])
+    condicoes = [condicao]
+    condicoes += rec_Condicoes()
     return Exp(name,condicoes)
 
 
@@ -128,23 +142,72 @@ def rec_Exps():
     else:
         parserError(prox_simb)
 
-def rec_Start():
+def rec_Gramatica():
     global LL1
     exp = rec_Exp()
     LL1.insert(exp)
     rec_Exps()
+
+def rec_ListTokens():
+    global prox_simb
+    global LL1
+    if prox_simb == None:
+        parserErrorExit()
+
+    dist = {}
+    if prox_simb.type == 'LITERAL':
+        name = rec_term('LITERAL')
+        rec_term('EQUALS')
+        regex = rec_term('LITERAL')
+        dist[name] = regex
+
+        listResto = rec_ListTokens()
+        dist.update(listResto)
+
+    return dist
+
+def rec_ValidsTOKENS():
+    rec_term('ATOKENS')
+    tokens = rec_ListTokens()
+    rec_term('FCLOSE')
+    return tokens
+
+def rec_ListLiterals():
+    global prox_simb
+    global LL1
+    if prox_simb == None:
+        parserErrorExit()
+    list = []
+    if prox_simb.type == 'LITERAL':
+        name = rec_term('LITERAL')
+        list = [name] + rec_ListLiterals()
+
+    return list
+
+def rec_ValidsLiterals():
+    rec_term('ALITERALS')
+    tokens = rec_ListLiterals()
+    rec_term('FCLOSE')
+    return tokens
+
+
+def rec_Start():
+    global LL1
+    LL1.literals =  rec_ValidsLiterals()
+    LL1.tokens = rec_ValidsTOKENS()
+    rec_Gramatica()
 
 def rec_Parser(data):
     global prox_simb
     lexer.input(data)
     prox_simb = lexer.token()
     rec_Start()
-    print("Gramática correta")
-    print("\nEstrutura lida ate agora: \n")
+    # print("Gramática correta")
+    # print("\nEstrutura lida ate agora: \n")
 
 def parser_Gramatica(programa):
     global LL1
-    print("\nStarting...")
+    # print("\nStarting...")
     rec_Parser(programa)
     LL1.build_symbols_exps()
     return LL1

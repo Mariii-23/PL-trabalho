@@ -6,9 +6,9 @@ from buildParser import buildParser
 import sys
 programa = sys.stdin.read()
 LL1 = parser_Gramatica(programa)
-print(LL1)
+# print(LL1)
 
-print("Is a LL1??? -> ", LL1.isLL1())
+# print("Is this a LL1??? -> ", LL1.isLL1())
 
 stringFile = buildParser(LL1)
-# print(stringFile)
+print(stringFile)
