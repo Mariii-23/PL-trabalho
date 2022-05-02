@@ -1,0 +1,42 @@
+Literals = ['=' '(' ')' ',' '.']
+Tokens = ['INT'='int' 'INPUT'='input' 'STR'='str' 'PRINT'='print' 'id'='\w+'
+'str'='\w+']
+
+Z -> Program '.';;
+
+Program -> Declarations Statements;
+;
+
+Declarations -> Declarations Declaration ;
+               |;
+;
+
+Declaration -> Type IdList;;
+
+Type -> 'INT' ;| 'STR';;
+
+IdList -> 'id';
+        | IdList ',' 'id';;
+
+Statements -> Statments Statement ;
+            | Statment;;
+
+Statment -> Atrib;
+           | 'PRINT' ;
+;
+
+Atrib -> 'id' '=' Exp;;
+
+Print -> 'PRINT' '(' PrintArgs ')';;
+
+PrintArgs -> PrintArgs ',' PrintArg;
+            | PrintArg;;
+
+PrintArg -> 'id' ;
+| 'STR';
+| Exp;;
+
+Exp -> INPUT '(' 'str' ')';
+     | INT '(' Exp ')';;
+.
+

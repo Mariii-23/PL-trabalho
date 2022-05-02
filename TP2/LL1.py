@@ -68,6 +68,8 @@ class LL1:
     def insert(self, exp: Exp):
         self.exps[exp.name] = exp
 
+    # TODO no caso de ser recursividade a esquerda
+    # vai estourar
     def build_symbols_exp(self, name):
         if name not in self.exps:
             return []
