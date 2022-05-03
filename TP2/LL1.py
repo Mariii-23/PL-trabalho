@@ -68,19 +68,13 @@ class LL1:
     def insert(self, exp: Exp):
         self.exps[exp.name] = exp
 
-    # TODO no caso de ser recursividade a esquerda
-    # vai estourar
     def build_symbols_exp(self, name):
         if name not in self.exps:
             return []
         exp = self.exps[name]
         symbols = exp.symbols
         if len(symbols) == 0:
-            exp = self.exps[name]
-            if len(self.exps[exp.name].symbols) != 0:
-                symbols = symbols
-            else:
-                for condiction in exp.condictions:
+            for condiction in exp.condictions:
                     symbols += self.search_symbol(condiction, exp.name)
             self.exps[exp.name].symbols = symbols
 
@@ -94,9 +88,6 @@ class LL1:
                symbols += self.build_symbols_right(exp.name, [])
            else:
                symbols_condiction = condiction.symbols
-               # TODO no caso dos simbolos da condicao forem 0
-               # temos uma expressao no inicio... logo temos q ir pesquisar
-               # TODO verificar se ta bem
                if len(symbols_condiction) == 0:
                    symbols_condicton = self.build_symbols_right(exp.name, [])
                symbols += symbols_condiction
@@ -145,6 +136,8 @@ class LL1:
 
     def isLL1(self):
         result = True
+        if len(self.tokens) == 0 and len(self.literals) == 0:
+            return False
         for exp in self.exps:
             exp = self.exps[exp]
             if len(exp.condictions) == 1:

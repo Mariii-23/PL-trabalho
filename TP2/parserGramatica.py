@@ -210,5 +210,6 @@ def parser_Gramatica(programa):
     global LL1
     # print("\nStarting...")
     rec_Parser(programa)
-    LL1.build_symbols_exps()
+    if len(LL1.tokens) != 0 or len(LL1.literals) != 0:
+        LL1.build_symbols_exps()
     return LL1
