@@ -45,8 +45,8 @@ class LL1:
     def __init__(self, exps = {}):
         self.exps = exps
         self.rules = []
-        self.literals = {}
-        self.tokens = []
+        self.tokens = {}
+        self.literals = []
 
     def __str__(self):
         phrase = "Rules : "
