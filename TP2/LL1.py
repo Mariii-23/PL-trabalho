@@ -68,14 +68,14 @@ class LL1:
     def insert(self, exp: Exp):
         self.exps[exp.name] = exp
 
-    def build_symbols_exp(self, name):
-        if name not in self.exps:
+    def build_symbols_exp(self, name, dont_look=[]):
+        if name not in self.exps or name in dont_look:
             return []
         exp = self.exps[name]
         symbols = exp.symbols
         if len(symbols) == 0:
             for condiction in exp.condictions:
-                    symbols += self.search_symbol(condiction, exp.name)
+                    symbols += self.search_symbol(condiction, exp.name, dont_look + [name])
             self.exps[exp.name].symbols = symbols
 
         return symbols
@@ -117,15 +117,15 @@ class LL1:
                                 symbols += self.get_follow_symbols(elem_name, [])
         return symbols
 
-    def search_symbol(self, condiction, exp_name):
+    def search_symbol(self, condiction, exp_name, dont_look = []):
         symbols = condiction.symbols
         if len(symbols) == 0:
             if len(condiction.rules) > 0:
                 value = condiction.rules[0]
-                symbols = self.build_symbols_exp(value)
+                symbols = self.build_symbols_exp(value, dont_look)
             else:
                 #procurar a direita
-                symbols = self.build_symbols_right(exp_name, [])
+                symbols = self.build_symbols_right(exp_name, [] + exp_name)
 
             condiction.symbols = symbols
         return symbols
@@ -140,12 +140,15 @@ class LL1:
             return False
         for exp in self.exps:
             exp = self.exps[exp]
-            if len(exp.condictions) == 1:
-                continue
+            # if len(exp.condictions) == 1:
+            #     continue
             values = []
             for condiction in exp.condictions:
                 if not result:
                     return result
+                if len(condiction.symbols) == 0:
+                    return False
+
                 for value in condiction.symbols:
                     if value in values:
                         result = False
