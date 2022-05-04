@@ -1,8 +1,7 @@
 #!/usr/bin/env python3
 from parserGramatica import parser_Gramatica
 from LL1 import LL1, Condiction, Exp
-# from buildParser import buildParser
-from buildParser2 import buildParser
+from buildParser import buildParser
 
 import sys
 programa = sys.stdin.read()

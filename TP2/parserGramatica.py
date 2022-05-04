@@ -55,33 +55,42 @@ def rec_term(simb):
         parserError(simb)
         exit(-1)
 
-def rec_Tokens(tokens: list = [], symbols: list = [], last: str = ''):
+def rec_Tokens():
+# def rec_Tokens(tokens: list = [], symbols: list = [], last: str = ''):
     global prox_simb, LL1
+    dic = {}
+    dic["tokens"] = []
+    dic["symbols"] = []
+    dic["last"] = ''
     if prox_simb == None:
         parserErrorExit()
     if prox_simb.type == 'ID':
         value = rec_term('ID')
-        acoes = rec_Tokens(tokens + [value], symbols, value)
-        tokens = acoes.rules
-        symbols = acoes.symbols
-        last = acoes.last_symbol
+        dic["tokens"] = [value]
+        dic["last"] = value
+        rest_dic = rec_Tokens()
+
+        dic["tokens"] += rest_dic["tokens"]
+        if len(rest_dic["last"]) > 0:
+            dic["last"] = rest_dic["last"]
+
+
     elif prox_simb.type == 'LITERAL':
         value = rec_term('LITERAL')
         if value not in LL1.literals and  value not in LL1.tokens :
             parserError(prox_simb)
             print("Token or Id dont exist: " + value)
             exit(-1)
+        rest_dic = rec_Tokens()
+        dic["tokens"] = [value] + rest_dic["tokens"]
+        dic["last"] = rest_dic["last"]
+        dic["symbols"] = [value]
 
-        symbols = [value] if len(symbols) == 0 else symbols
-        acoes = rec_Tokens(tokens + [value], symbols, value)
-        tokens = acoes.rules
-        symbols = acoes.symbols
-        last = acoes.last_symbol
     elif prox_simb.type == 'END':
         rec_term('END')
     else:
         parserError(prox_simb)
-    return Condiction(tokens, symbols, last)
+    return dic
 
 def rec_Condicao():
     value = ""
@@ -92,12 +101,15 @@ def rec_Condicao():
         value = rec_term('ID')
     elif prox_simb.type == 'LITERAL':
         value = rec_term('LITERAL')
-        # LL1.literals += [value]
         symbols = [value]
     else:
         parserError(prox_simb)
 
-    return rec_Tokens([value], symbols, value)
+    dic = rec_Tokens()
+    tokens = [value] + dic["tokens"]
+    last = dic["last"] if len(dic["last"]) != 0 else value
+
+    return Condiction(tokens , symbols, last)
 
 def rec_Condicoes():
     global prox_simb
@@ -106,8 +118,8 @@ def rec_Condicoes():
     condicoes = []
     if prox_simb.type == 'SEP':
         rec_term('SEP')
-        condicao = rec_Tokens()
-        condicoes = [condicao]
+        dic = rec_Tokens()
+        condicoes = [Condiction(dic["tokens"], dic["symbols"], dic["last"])]
         condicoes += rec_Condicoes()
     elif prox_simb.type == 'END':
         rec_term('END')

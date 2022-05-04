@@ -3,7 +3,7 @@
 import numpy as np
 
 class Condiction:
-    def __init__(self, tokens: list = [], symbols = [], last_symbol: str = ''):
+    def __init__(self, tokens: list = [], symbols: list = [], last_symbol: str = ''):
         self.rules =  tokens
         self.symbols = symbols
         self.last_symbol = last_symbol
