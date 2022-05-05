@@ -125,7 +125,7 @@ class LL1:
                 symbols = self.build_symbols_exp(value, dont_look)
             else:
                 #procurar a direita
-                symbols = self.build_symbols_right(exp_name, [] + exp_name)
+                symbols = self.build_symbols_right(exp_name, [exp_name])
 
             condiction.symbols = symbols
         return symbols

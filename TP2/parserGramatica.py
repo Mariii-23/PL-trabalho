@@ -92,7 +92,7 @@ def rec_Tokens():
         parserError(prox_simb)
     return dic
 
-def rec_Condicao():
+def rec_Condiction():
     value = ""
     symbols = []
     if prox_simb == None:
@@ -111,21 +111,21 @@ def rec_Condicao():
 
     return Condiction(tokens , symbols, last)
 
-def rec_Condicoes():
+def rec_Condictions():
     global prox_simb
     if prox_simb == None:
         parserErrorExit()
-    condicoes = []
+    condictions = []
     if prox_simb.type == 'SEP':
         rec_term('SEP')
         dic = rec_Tokens()
-        condicoes = [Condiction(dic["tokens"], dic["symbols"], dic["last"])]
-        condicoes += rec_Condicoes()
+        condictions = [Condiction(dic["tokens"], dic["symbols"], dic["last"])]
+        condictions += rec_Condictions()
     elif prox_simb.type == 'END':
         rec_term('END')
     else:
         parserError(prox_simb)
-    return condicoes
+    return condictions
 
 def rec_Exp():
     global prox_simb
@@ -135,10 +135,10 @@ def rec_Exp():
 
     rec_term('SETA')
 
-    condicao = rec_Condicao()
-    condicoes = [condicao]
-    condicoes += rec_Condicoes()
-    return Exp(name,condicoes)
+    condiction = rec_Condiction()
+    condictions = [condiction]
+    condictions += rec_Condictions()
+    return Exp(name,condictions)
 
 
 def rec_Exps():
