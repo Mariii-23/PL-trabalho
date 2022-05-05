@@ -218,7 +218,7 @@ def rec_Parser(data):
     # print("Gramática correta")
     # print("\nEstrutura lida ate agora: \n")
 
-def parser_Gramatica(programa):
+def parser_Grammar(programa):
     global LL1
     # print("\nStarting...")
     rec_Parser(programa)

@@ -1,0 +1,12 @@
+Literals = ['.' ]
+Tokens = [ ]
+
+Z -> Exp '.' ;
+;
+
+Exp -> Exp2;
+;
+
+Exp2 -> Exp;
+;
+.
