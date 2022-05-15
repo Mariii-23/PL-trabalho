@@ -31,7 +31,7 @@ def add_tokens(ll1: LL1):
         name = token[1:len(token)-1]
         string += "def t_" + name + "(t):\n"
         string += "\tr" + regex +"\n"
-        # TODO aqui podemos devolver outra cena
+        # TODO Mais tarde poderemos acrescentar aqui ações
         string += "\treturn t\n"
 
 
@@ -66,7 +66,7 @@ def add_term(exp: Exp, ll1: LL1):
         string = string[:len(string)-1]
         string +="\"\n\n"
         i+=1
-        # TODO depois aqui podemos por acoes
+        # TODO Mais tarde poderemos acrescentar aqui ações
 
 
 def add_rules(ll1: LL1):

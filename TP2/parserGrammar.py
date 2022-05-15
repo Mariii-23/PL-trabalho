@@ -16,7 +16,6 @@ t_ALITERALS = r'Literals\s*=\s*\[\s*'
 
 t_ATOKENS = r'Tokens\s*=\s*\[\s*'
 
-# define a rule so we can track line numbers
 def t_new_line(t):
     r'\n+'
     t.lexer.lineno += len(t.value)
